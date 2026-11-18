@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ten real-life AI security cases</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #f5f8ff; --surface: #ffffff; --ink: #0e0e0e; --muted: #454f68;
+  --blue: #266de8; --blue-text: #1c56c4; --yellow: #ffe629; --soft: #e6eeff;
+  --line: #0e0e0e; --shadow: #0e0e0e; --dot: rgba(38, 109, 232, 0.16);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1020; --surface: #151c33; --ink: #f5f8ff; --muted: #aeb9d6;
+    --blue-text: #8db1ff; --soft: #1d2848; --line: #dfe7ff; --shadow: #2b3a73;
+    --dot: rgba(141, 177, 255, 0.14);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1020; --surface: #151c33; --ink: #f5f8ff; --muted: #aeb9d6;
+  --blue-text: #8db1ff; --soft: #1d2848; --line: #dfe7ff; --shadow: #2b3a73;
+  --dot: rgba(141, 177, 255, 0.14);
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+*, *::before, *::after { box-sizing: inherit; }
+body {
+  margin: 0; min-height: 100%; background: var(--bg); color: var(--ink);
+  font: 400 17px/1.55 "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background-image: radial-gradient(circle, var(--dot) 2px, transparent 2.6px);
+  background-size: 34px 34px;
+}
+.deco { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.deco i { position: absolute; border-radius: 50%; }
+.deco .a { width: 420px; height: 420px; background: var(--yellow); opacity: 0.3; right: -150px; top: -130px; }
+.deco .b { width: 540px; height: 540px; background: var(--blue); opacity: 0.14; left: -220px; bottom: -220px; }
+h1, h2, h3 { font-family: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif; margin: 0; line-height: 1.1; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 4px solid var(--blue); outline-offset: 3px; }
+
+.top { background: var(--blue); border-bottom: 3px solid var(--line); }
+.top-in { max-width: 1180px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { display: block; height: 34px; width: auto; }
+.top-tag { color: #fff; font-weight: 600; font-size: 15px; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding: 30px 20px 72px; }
+
+/* intro */
+.intro { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; align-items: stretch; }
+.hero { background: var(--surface); border: 3px solid var(--line); border-radius: 26px; box-shadow: 8px 8px 0 var(--shadow); padding: 28px; }
+.hero h1 { font-size: clamp(34px, 6vw, 56px); font-weight: 800; letter-spacing: -0.03em; }
+.hero p { margin: 14px 0 0; font-size: 19px; max-width: 32em; }
+.panel { background: var(--yellow); color: #0e0e0e; border: 3px solid var(--line); border-radius: 26px; box-shadow: 8px 8px 0 var(--shadow); padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+.count { font: 800 22px/1.2 "Bricolage Grotesque", system-ui, sans-serif; }
+.meter { height: 20px; border: 3px solid #0e0e0e; border-radius: 999px; background: #fff; overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: var(--blue); transition: width 0.5s ease; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+  cursor: pointer; background: #fff; color: #0e0e0e; border: 3px solid #0e0e0e; border-radius: 14px; padding: 9px 16px;
+  font: 800 16px/1.1 "Bricolage Grotesque", system-ui, sans-serif; box-shadow: 4px 4px 0 #0e0e0e; transition: transform 0.12s, box-shadow 0.12s;
+}
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #0e0e0e; }
+.btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #0e0e0e; }
+.btn:focus-visible { outline-color: #0e0e0e; }
+.done { margin: 24px 0 0; padding: 16px 20px; background: var(--blue); color: #fff; border: 3px solid var(--line); border-radius: 18px; box-shadow: 6px 6px 0 var(--shadow); font: 800 20px/1.3 "Bricolage Grotesque", system-ui, sans-serif; }
+.done[hidden] { display: none; }
+
+/* grid and cards */
+.grid { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 30px; padding: 0; margin: 34px 0 0; }
+.flip { display: flex; perspective: 1500px; }
+.inner { position: relative; flex: 1; display: grid; transform-style: preserve-3d; transition: transform 0.75s cubic-bezier(0.25, 0.8, 0.25, 1); }
+.flip.flipped .inner { transform: rotateY(180deg); }
+.face {
+  grid-area: 1 / 1; display: flex; flex-direction: column; gap: 10px; padding: 22px;
+  border: 3px solid var(--line); border-radius: 26px; box-shadow: 8px 8px 0 var(--shadow);
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.front { background: var(--tc); color: #0e0e0e; cursor: pointer; }
+.back { background: var(--surface); transform: rotateY(180deg); cursor: pointer; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.team { display: inline-block; background: #0e0e0e; color: #fff; border: 2px solid #0e0e0e; border-radius: 999px; padding: 3px 14px; font-weight: 600; font-size: 15px; line-height: 1.5; }
+.caseno { font-weight: 600; font-size: 15px; }
+.emoji { font-size: 66px; line-height: 1; margin: 6px 0 0; animation: bob 3.6s ease-in-out infinite; align-self: flex-start; }
+.face h2 { font-size: 27px; font-weight: 800; letter-spacing: -0.02em; }
+.case { margin: 0; font-size: 18px; flex: 1; }
+.fbtn {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; margin-top: 6px;
+  background: #0e0e0e; color: #fff; border: 3px solid #0e0e0e; border-radius: 14px; padding: 9px 16px; font-weight: 600; font-size: 16px;
+}
+.fbtn svg { width: 18px; height: 18px; flex: none; }
+.back .fbtn { background: var(--yellow); color: #0e0e0e; border-color: var(--line); }
+.fbtn:focus-visible { outline-color: var(--blue); }
+.front .fbtn:focus-visible { outline-color: #0e0e0e; }
+
+.verdict { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; border: 3px solid var(--line); border-radius: 999px; padding: 5px 16px 5px 10px; font: 800 18px/1.2 "Bricolage Grotesque", system-ui, sans-serif; }
+.verdict svg { width: 26px; height: 26px; flex: none; }
+.v-go { background: var(--blue); color: #fff; }
+.v-ask { background: var(--yellow); color: #0e0e0e; }
+.v-no { background: #ff8f8f; color: #0e0e0e; }
+.back h3 { font-size: 21px; font-weight: 800; margin-top: 4px; }
+.steps { list-style: none; counter-reset: s; padding: 0; margin: 0; display: grid; gap: 10px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 30px 1fr; gap: 10px; font-size: 16px; line-height: 1.45; }
+.steps li::before { content: counter(s); width: 30px; height: 30px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; font: 800 15px/1 "Bricolage Grotesque", system-ui, sans-serif; }
+.tip { margin: 2px 0 0; padding: 10px 14px; background: var(--soft); border: 2px dashed var(--line); border-radius: 14px; font-weight: 600; font-size: 16px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; list-style: none; }
+.chips li { background: var(--surface); border: 2px solid var(--line); border-radius: 999px; padding: 1px 12px; font-size: 14px; font-weight: 600; }
+
+/* team colors on the front of each card */
+.t-hr { --tc: #ffb8d0; } .t-marketing { --tc: #d4c2ff; } .t-support { --tc: #a8ccff; } .t-technical { --tc: #aef0d4; }
+.t-operations { --tc: #ffcf99; } .t-cs { --tc: #9fe3e6; } .t-revops { --tc: #ffe629; } .t-infosec { --tc: #c9c9ff; }
+.t-finance { --tc: #c9f0a7; } .t-everyone { --tc: #ffadad; }
+
+#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; overflow: hidden; }
+#confetti i { position: absolute; width: 10px; height: 14px; border-radius: 3px; animation: burst 1.3s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-8px) rotate(3deg); } }
+@keyframes burst { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), calc(var(--dy) + 260px)) rotate(var(--rot)); opacity: 0; } }
+
+@media (max-width: 820px) {
+  .intro { grid-template-columns: 1fr; }
+  .grid { gap: 26px; }
+}
+@media (max-width: 480px) {
+  .hero, .panel { padding: 20px; }
+  .face { padding: 18px; border-radius: 22px; box-shadow: 6px 6px 0 var(--shadow); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .inner, .flip.flipped .inner { transform: none; }
+  .face { backface-visibility: visible; -webkit-backface-visibility: visible; }
+  .back { transform: none; opacity: 0; visibility: hidden; }
+  .flip.flipped .front { opacity: 0; visibility: hidden; }
+  .flip.flipped .back { opacity: 1; visibility: visible; }
+}
+</style>
+</head>
+<body>
+<div class="deco" aria-hidden="true"><i class="a"></i><i class="b"></i></div>
+
+<header class="top">
+  <div class="top-in">
+    <svg class="logo" role="img" aria-label="TaxDome" viewBox="0 0 120 32" width="128" height="34"><path d="M10.5356 3.37849C11.3829 2.90571 12.4132 2.87566 13.2834 3.28941L13.4548 3.37849L15.1444 4.32389C15.4687 4.50548 15.5262 4.91904 15.3533 5.20702C15.1864 5.48465 14.8167 5.62805 14.5061 5.45511L12.7885 4.49918V4.49822C12.2924 4.22151 11.6808 4.22162 11.1845 4.49822L2.10366 9.58055C1.60913 9.85854 1.30614 10.3687 1.30456 10.9187V21.0814L1.31996 21.2854C1.38689 21.7565 1.67502 22.1779 2.1104 22.4195H2.11136L11.1922 27.5019C11.6886 27.7787 12.3 27.7787 12.7962 27.5019L21.8771 22.4195L22.0533 22.3056C22.4426 22.0144 22.675 21.5636 22.6762 21.0824V10.9187C22.6748 10.4376 22.4424 9.98688 22.0533 9.6955L21.8771 9.58055L21.1598 9.17922C20.8382 8.99902 20.7781 8.58995 20.947 8.30183C21.1128 8.0197 21.4858 7.87303 21.7991 8.048L22.5366 8.45987L22.7012 8.56045C23.5066 9.08438 23.9979 9.96591 24 10.9177V21.0824C24 22.0955 23.4459 23.031 22.5472 23.5402H22.5462L13.4653 28.6226H13.4644C12.5605 29.1259 11.4491 29.126 10.5453 28.6226L1.46341 23.5402C0.560342 23.0338 0.00167075 22.0978 1.89029e-07 21.0824V10.9187C-0.000373914 9.90528 0.554559 8.96976 1.45379 8.46083V8.45987L10.5356 3.37849ZM11.4811 14.6073H8.85655V19.6916H7.16399V14.6073H4.53947V13.0757H11.4811V14.6073ZM15.5324 13.0757C17.6291 13.0757 19.1514 14.4655 19.1515 16.3822C19.1515 18.2991 17.6292 19.6916 15.5324 19.6916H12.8434V13.0757H15.5324ZM14.5359 18.1887H15.5324V18.1849C16.6441 18.1848 17.3904 17.4692 17.3906 16.3918C17.3906 15.3141 16.6443 14.5902 15.5324 14.5901H14.5359V18.1887ZM18.1271 5.36315C18.9244 5.36341 19.5712 5.98965 19.5712 6.76257C19.5712 7.53545 18.9244 8.16173 18.1271 8.16198C17.3295 8.16198 16.683 7.53561 16.6829 6.76257C16.6829 5.9895 17.3295 5.36315 18.1271 5.36315Z" fill="#FFFFFF"/><path d="M88.0975 9.99988C91.8513 9.99988 94.5377 12.6691 94.5377 16.0003C94.5375 19.3313 91.8088 21.9997 88.0553 21.9999C84.3017 21.9999 81.6154 19.3314 81.6151 16.0003C81.6151 12.7024 84.3439 10.0001 88.0975 9.99988ZM120 12.4586H113.399V14.8118H119.136V17.0947H113.399V19.5332H120V21.8021H110.74V10.1862H120V12.4586ZM54.2883 21.8012H51.4946L50.3843 19.1983H45.2374L44.1271 21.8012H41.398L46.6059 10.1159H49.075L54.2883 21.8012ZM41.7881 12.5527H37.2339V21.7995H34.5506L34.5569 12.5527H30V10.1985H41.7881V12.5527ZM61.0577 13.96L63.6316 10.1985H66.671L62.5958 15.8658L66.8378 21.7995H63.7168L60.9859 17.8235L58.2407 21.7995H55.2004L59.4398 15.8992L55.3753 10.1985H58.5035L61.0577 13.96ZM73.4736 10.1985C77.2969 10.1987 79.9398 12.7015 79.9398 15.9994C79.9394 19.297 77.2967 21.7993 73.4736 21.7995H68.7293V10.1985H73.4736ZM102.509 15.094L105.705 10.1862H108.589V21.7924H105.931V14.2185L102.509 19.172H102.44L99.0506 14.28V21.7924H96.4265V10.1862H99.3116L102.509 15.094ZM88.0661 12.3531C85.9117 12.3531 84.417 13.9773 84.4169 15.9986C84.4171 18.0196 85.9466 19.6528 88.1011 19.6528C90.2553 19.6526 91.7492 18.0195 91.7494 15.9986C91.7493 14.0107 90.2204 12.3533 88.0661 12.3531ZM71.4055 19.4963H73.4736C75.6628 19.4963 77.1414 18.0861 77.1417 15.9986C77.1417 13.9108 75.6631 12.5008 73.4736 12.5008H71.4055V19.4963ZM46.1979 16.9435H49.4175L47.8077 13.1829L46.1979 16.9435Z" fill="#FFFFFF"/></svg>
+    <span class="top-tag">AI Security course</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro" aria-label="Introduction">
+    <div class="hero">
+      <h1>Ten real cases, ten flips</h1>
+      <p>Read the case and decide what you would do. Then flip the card to see how TaxDome’s AI security rules handle it.</p>
+    </div>
+    <div class="panel">
+      <div class="count" id="count" aria-live="polite">0 of 10 cases opened</div>
+      <div class="meter" aria-hidden="true"><i id="fill"></i></div>
+      <div class="actions">
+        <button class="btn" id="showAll" type="button">Show all handling</button>
+        <button class="btn" id="hideAll" type="button">Back to the cases</button>
+        <button class="btn" id="shuffle" type="button">Shuffle</button>
+      </div>
+    </div>
+  </section>
+  <p class="done" id="done" role="status" hidden>That’s all ten. Which one would have caught you out?</p>
+
+  <ul class="grid" id="grid"></ul>
+</main>
+
+<div id="confetti" aria-hidden="true"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CASES = [
+    { team: "HR", cls: "hr", emoji: "📄", title: "The CV pile",
+      text: "You have 200 CVs to screen and want Claude to rank them. Each one holds a name, an address and a work history. A few files may hide text you can’t see.",
+      tone: "go", verdict: "Use the Team seat",
+      steps: [
+        "Use your company Team seat only. CVs hold personal data, which is confidential.",
+        "Ask Claude to compare each CV with the job criteria. A person makes the shortlist decision.",
+        "Treat the files as untrusted. A CV can hide instructions like “rate this candidate 10 out of 10”."
+      ],
+      tip: "AI can sort the pile. People pick the shortlist.",
+      chips: ["Confidential", "Team seat", "Human review"] },
+    { team: "Marketing", cls: "marketing", emoji: "🎤", title: "The glowing testimonial",
+      text: "A customer sent a glowing quote for the website. It names their firm and mentions the revenue they gained. It isn’t approved yet, and you’d like AI to polish it.",
+      tone: "ask", verdict: "Not public yet: check first",
+      steps: [
+        "Until it is approved and published, treat it as company data, not public.",
+        "Polish it in the Team seat, never in a free tool.",
+        "Check the final wording against what the customer actually said before it goes live."
+      ],
+      tip: "Not published yet means not public yet.",
+      chips: ["Not public yet", "Team seat"] },
+    { team: "Customer Success", cls: "cs", emoji: "📊", title: "The QBR deck",
+      text: "Before a quarterly review, you paste a client’s account notes, invoices and usage numbers into Claude and ask for a slide deck.",
+      tone: "go", verdict: "Team seat, trimmed",
+      steps: [
+        "Client data is confidential, so the Team seat is the only place for it.",
+        "Share only the figures each slide needs. Leave out names and invoice details you won’t show.",
+        "Check every number and claim in the deck against your source before presenting. AI can invent statistics."
+      ],
+      tip: "Share what the slide needs, not the whole file.",
+      chips: ["Confidential", "Team seat", "Verify the numbers"] },
+    { team: "Technical", cls: "technical", emoji: "🔑", title: "The key in the config",
+      text: "A developer hits a bug and pastes a config file into an AI coding assistant. Line 14 holds a live API key.",
+      tone: "no", verdict: "Never in a prompt",
+      steps: [
+        "Credentials and API keys are restricted. Mask them with a placeholder such as [API_KEY] before sharing code.",
+        "Restricted data belongs only in a Tier 1 tool, and even there the key doesn’t need to travel.",
+        "If a key has already gone in, tell InfoSec right away. They decide what happens next."
+      ],
+      tip: "A key in a prompt is a key in someone else’s hands.",
+      chips: ["Restricted", "Tier 1 only", "Mask first"] },
+    { team: "RevOps", cls: "revops", emoji: "🗂️", title: "The 5,000-row export",
+      text: "You export 5,000 contacts from the CRM and want AI to remove duplicates and group them by industry.",
+      tone: "go", verdict: "Team seat, minimum data",
+      steps: [
+        "Contacts hold personal and client data. That makes them confidential, so the Team seat only.",
+        "Do you need names and emails? Try a masked sample, or ask Claude for the dedupe method instead of uploading everything.",
+        "Keep the results inside company tools."
+      ],
+      tip: "Ask for the method before you upload the data.",
+      chips: ["Confidential", "Team seat", "Minimum data"] },
+    { team: "Operations", cls: "operations", emoji: "📑", title: "The contract rush",
+      text: "Legal is busy, so you ask Claude to summarize a vendor contract and flag risky clauses before you sign.",
+      tone: "ask", verdict: "Team seat, then Legal",
+      steps: [
+        "A contract isn’t public. Use the Team seat.",
+        "Treat the summary as a reading aid, not legal advice. AI can miss clauses or invent them.",
+        "Legal still reviews anything you plan to sign."
+      ],
+      tip: "A summary is a reading aid, not a signature.",
+      chips: ["Not public", "Team seat", "Human review"] },
+    { team: "InfoSec", cls: "infosec", emoji: "🧩", title: "The browser extension",
+      text: "A teammate installs a trendy AI browser extension. It reads every page they open, including the admin panel and client records.",
+      tone: "ask", verdict: "Ask InfoSec first",
+      steps: [
+        "A tool that isn’t on the policy’s list needs a word with InfoSec before it touches company data.",
+        "An extension that reads every page can see everything on screen, client data included.",
+        "Remove it until InfoSec says yes."
+      ],
+      tip: "If it reads every page, it sees every page.",
+      chips: ["Not on the list", "Ask InfoSec"] },
+    { team: "Finance", cls: "finance", emoji: "🧾", title: "The invoice photo",
+      text: "You photograph a supplier invoice that shows full bank details and ask a free AI app to pull out the numbers.",
+      tone: "no", verdict: "Not in a free app",
+      steps: [
+        "Banking details are restricted, and free tools take public data only. Don’t use the app.",
+        "Use your approved finance process. If the task truly needs AI, use the Team seat and mask account numbers.",
+        "Already uploaded it? Tell InfoSec now."
+      ],
+      tip: "Restricted data and free tools never mix.",
+      chips: ["Restricted", "Free tool: public only"] },
+    { team: "Support", cls: "support", emoji: "😡", title: "The angry email",
+      text: "A customer threatens to leave. You ask Claude for a calming reply, and you’re tempted to hit send the moment it appears.",
+      tone: "go", verdict: "Draft yes, send after review",
+      steps: [
+        "Use the Team seat, and give Claude only the details the reply needs.",
+        "Read the draft line by line. AI can promise refunds, dates or fixes that don’t exist.",
+        "You press send, not the AI."
+      ],
+      tip: "The draft is AI’s. The send button is yours.",
+      chips: ["Confidential", "Team seat", "Human review"] },
+    { team: "Everyone", cls: "everyone", emoji: "⏰", title: "The 4:55 deadline",
+      text: "Your Team seat hits its usage limit at 4:55 pm. A client report is due at 5. A free chatbot is one tab away.",
+      tone: "no", verdict: "Don’t switch tools",
+      steps: [
+        "A client report isn’t public data, so a free chatbot is off limits, even for “just this once”.",
+        "Tell your manager about the deadline, or finish the draft yourself.",
+        "Need more capacity? Ask about your seat in #security_helpdesk."
+      ],
+      tip: "Deadlines don’t change the data class.",
+      chips: ["Free tool: public only", "Ask early"] }
+  ];
+
+  var ICONS = {
+    go: '<svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="#fff"/><path d="M7.5 13.5l4 4 7-8.5" fill="none" stroke="#266de8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    ask: '<svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="#0e0e0e"/><rect x="11.4" y="6" width="3.2" height="9" rx="1.6" fill="#ffe629"/><circle cx="13" cy="19" r="1.9" fill="#ffe629"/></svg>',
+    no: '<svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="#0e0e0e"/><path d="M8.5 8.5l9 9M17.5 8.5l-9 9" fill="none" stroke="#ff8f8f" stroke-width="3" stroke-linecap="round"/></svg>'
+  };
+  var FLIP = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8a7 7 0 0 1 12-3.5M17 12a7 7 0 0 1-12 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15.5 1.5v3.5H12M4.5 18.5V15H8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var COLORS = ["#266de8", "#ffe629", "#ffb8d0", "#aef0d4", "#d4c2ff", "#ffcf99"];
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var grid = document.getElementById("grid");
+  var opened = {};
+  var cards = [];
+
+  function el(tag, cls, html) { var n = document.createElement(tag); if (cls) n.className = cls; if (html !== undefined) n.innerHTML = html; return n; }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  CASES.forEach(function (c, n) {
+    var li = el("li", "flip t-" + c.cls);
+    var inner = el("div", "inner");
+    var front = el("div", "face front");
+    front.innerHTML =
+      '<div class="row"><span class="team">' + esc(c.team) + '</span><span class="caseno">Case ' + (n + 1) + '</span></div>' +
+      '<div class="emoji" aria-hidden="true">' + c.emoji + '</div>' +
+      '<h2>' + esc(c.title) + '</h2>' +
+      '<p class="case">' + esc(c.text) + '</p>' +
+      '<button class="fbtn" type="button">' + FLIP + 'Flip for the handling</button>';
+    var back = el("div", "face back");
+    back.innerHTML =
+      '<span class="verdict v-' + c.tone + '">' + ICONS[c.tone] + esc(c.verdict) + '</span>' +
+      '<h3>How to handle it</h3>' +
+      '<ol class="steps">' + c.steps.map(function (s) { return "<li><span>" + esc(s) + "</span></li>"; }).join("") + '</ol>' +
+      '<p class="tip">' + esc(c.tip) + '</p>' +
+      '<ul class="chips" aria-label="Policy check">' + c.chips.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + '</ul>' +
+      '<button class="fbtn" type="button">' + FLIP + 'Back to the case</button>';
+    back.setAttribute("aria-hidden", "true"); back.setAttribute("inert", "");
+    inner.appendChild(front); inner.appendChild(back); li.appendChild(inner); grid.appendChild(li);
+    var card = { n: n, li: li, front: front, back: back, flipped: false };
+    cards.push(card);
+    li.addEventListener("click", function () { set(card, !card.flipped, true); });
+  });
+
+  function set(card, flipped, focus) {
+    card.flipped = flipped;
+    card.li.classList.toggle("flipped", flipped);
+    var show = flipped ? card.back : card.front, hide = flipped ? card.front : card.back;
+    show.removeAttribute("aria-hidden"); show.removeAttribute("inert");
+    hide.setAttribute("aria-hidden", "true"); hide.setAttribute("inert", "");
+    if (flipped && !opened[card.n]) { opened[card.n] = true; progress(); }
+    if (focus) { var b = show.querySelector(".fbtn"); if (b) b.focus({ preventScroll: true }); }
+  }
+
+  function progress() {
+    var k = Object.keys(opened).length;
+    document.getElementById("count").textContent = k + " of " + CASES.length + " cases opened";
+    document.getElementById("fill").style.width = (k / CASES.length * 100) + "%";
+    var done = document.getElementById("done");
+    if (k === CASES.length && done.hidden) { done.hidden = false; burst(); }
+  }
+
+  function burst() {
+    if (reduced) return;
+    var box = document.getElementById("confetti"), w = window.innerWidth;
+    for (var n = 0; n < 60; n++) {
+      var p = document.createElement("i");
+      p.style.left = (Math.random() * w) + "px"; p.style.top = "-10px";
+      p.style.background = COLORS[n % COLORS.length];
+      p.style.setProperty("--dx", (Math.random() * 200 - 100).toFixed(0) + "px");
+      p.style.setProperty("--dy", (Math.random() * 380 + 80).toFixed(0) + "px");
+      p.style.setProperty("--rot", (Math.random() * 720 - 360).toFixed(0) + "deg");
+      box.appendChild(p);
+      (function (node) { setTimeout(function () { node.remove(); }, 1500); })(p);
+    }
+  }
+
+  document.getElementById("showAll").addEventListener("click", function () { cards.forEach(function (c) { set(c, true, false); }); });
+  document.getElementById("hideAll").addEventListener("click", function () { cards.forEach(function (c) { set(c, false, false); }); });
+  document.getElementById("shuffle").addEventListener("click", function () {
+    var order = cards.slice();
+    for (var n = order.length - 1; n > 0; n--) { var j = Math.floor(Math.random() * (n + 1)); var t = order[n]; order[n] = order[j]; order[j] = t; }
+    order.forEach(function (c) { grid.appendChild(c.li); });
+  });
+})();
+</script>
+</body>
+</html>
